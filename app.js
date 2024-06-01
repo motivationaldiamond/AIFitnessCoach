@@ -23,7 +23,7 @@ app.use(express.json());
 app.use(loggingMiddleware);
 
 // Connect to MongoDB
-connectDB();
+connectDB(process.env.MONGO_URI);
 
 // Routes
 app.use('/api/users', userRoutes);
