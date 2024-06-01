@@ -1,12 +1,19 @@
 // nutritionRoutes.js
 
 const express = require('express');
+const {
+    addNutrition,
+    getAllNutritions,
+    getNutrition,
+    updateNutritionById,
+    deleteNutritionById,
+} = require('../controllers/nutritionController');
 const router = express.Router();
 
-// Import controller functions for handling nutrition-related operations
-const { addNutrition } = require('../controllers/nutritionController');
-
-// Define routes for nutrition-related operations
 router.post('/', addNutrition);
+router.get('/', getAllNutritions);
+router.get('/:id', getNutrition);
+router.put('/:id', updateNutritionById);
+router.delete('/:id', deleteNutritionById);
 
 module.exports = router;
