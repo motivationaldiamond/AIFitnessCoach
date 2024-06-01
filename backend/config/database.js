@@ -1,17 +1,22 @@
 //database.js
 
-const mongoose = require('mongoose');
-const { dbURI } = require('./keys');
+const { MongoClient } = require('mongodb');
+const { dbURI } = require('../../backend/config/keys');
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(dbURI, {
+    const client = new MongoClient(dbURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log('MongoDB connected');
+
+    await client.connect();
+    console.log('Connected to MongoDB');
+
+    // You can optionally return the client object if you need to access it elsewhere in your application
+    return client;
   } catch (err) {
-    console.error(err.message);
+    console.error('Error connecting to MongoDB:', err);
     process.exit(1);
   }
 };
