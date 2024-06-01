@@ -11,8 +11,7 @@ const nutritionRoutes = require('./backend/routes/nutritionRoutes');
 const chatRoutes = require('./backend/routes/chatRoutes');
 const loggingMiddleware = require('./backend/middleware/loggingMiddleware');
 const errorMiddleware = require('./backend/middleware/errorMiddleware');
-const connectDB = require('./backend/config/database');
-
+const { connectDB } = require('./backend/config/database'); // Correct import
 
 // Initialize Express application
 const app = express();
@@ -23,24 +22,24 @@ app.use(express.json());
 app.use(loggingMiddleware);
 
 // Connect to MongoDB and start the server after connection is established
-connectDB(process.env.MONGO_URI)
-    .then(() => {
-      console.log('Database connected and server starting...');
+connectDB()
+  .then(() => {
+    console.log('Database connected and server starting...');
 
-        // Routes
-        app.use('/api/users', userRoutes);
-        app.use('/api/exercises', exerciseRoutes);
-        app.use('/api/nutrition', nutritionRoutes);
-        app.use('/api/chat', chatRoutes);
+    // Routes
+    app.use('/api/users', userRoutes);
+    app.use('/api/exercises', exerciseRoutes);
+    app.use('/api/nutrition', nutritionRoutes);
+    app.use('/api/chat', chatRoutes);
 
-        // Error handling middleware
-        app.use(errorMiddleware);
+    // Error handling middleware
+    app.use(errorMiddleware);
 
-        // Start the server
-        app.listen(port, () => {
-            console.log(`Server is running on port ${port}`);
-        });
-    })
-    .catch(err => {
-        console.error('Failed to connect to MongoDB', err);
+    // Start the server
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
     });
+  })
+  .catch(err => {
+    console.error('Failed to connect to MongoDB', err);
+  });

@@ -2,17 +2,18 @@
 
 const { createNutrition } = require('../models/nutritionModel');
 
-async function addNutrition(req, res) {
-    const { userId, meal, calories, date } = req.body;
+const addNutrition = async (req, res) => {
     try {
-        const nutritionId = await createNutrition(userId, meal, calories, date);
-        res.status(201).json({ nutritionId });
-    } catch (err) {
-        console.error('Error adding nutrition:', err);
+        const { userId, meal, calories, date } = req.body;
+        const newNutrition = await createNutrition(userId, meal, calories, date);
+        res.status(201).json({ insertedId: newNutrition });
+    } catch (error) {
+        console.error('Error adding nutrition:', error);
         res.status(500).json({ error: 'Failed to add nutrition' });
     }
-}
+};
 
 module.exports = {
     addNutrition,
 };
+
