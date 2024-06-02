@@ -1,5 +1,11 @@
 // nutritionService.js
 
+const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
+const { openaiApiKey, openaiEndpoint } = require('../../config/keys');
+
+// Initialize OpenAI client
+const client = new OpenAIClient(openaiEndpoint, new AzureKeyCredential(openaiApiKey));
+
 class NutritionService {
     async handleNutritionQuery(userMessages) {
         try {
@@ -13,26 +19,23 @@ class NutritionService {
     }
 
     async generateNutritionResponse(query) {
-        // Implement logic to generate a nutrition response based on the user's query
-        // For now, we will simulate a response
-        const nutritionInfo = await this.queryDatabaseForNutrition(query);
-        return this.formatNutritionResponse(nutritionInfo);
-    }
-
-    async queryDatabaseForNutrition(query) {
-        // Simulate a database query
-        return {
-            meal: "Example Meal",
-            calories: 500,
-            protein: 20,
-            carbs: 60,
-            fat: 15
-        };
-    }
-
-    formatNutritionResponse(nutritionInfo) {
-        return `For your query, here is an example meal plan: ${nutritionInfo.meal}, which contains ${nutritionInfo.calories} calories with the following breakdown: Protein - ${nutritionInfo.protein}g, Carbs - ${nutritionInfo.carbs}g, Fat - ${nutritionInfo.fat}g.`;
+        try {
+            // Call the OpenAI API to generate a nutrition response based on the user's query
+            const chatResponse = await client.getChatCompletions("roseblunts-gpt-deployment", [
+                { role: "system", content: "You are a helpful nutrition expert." },
+                { role: "user", content: query }
+            ]);
+    
+            if (!chatResponse || !chatResponse.choices || chatResponse.choices.length === 0) {
+                throw new Error('Invalid response from OpenAI API');
+            }
+    
+            return chatResponse.choices[0].message.content;
+        } catch (error) {
+            console.error('Error in generateNutritionResponse:', error.message);
+            throw error;
+        }
     }
 }
-
+    
 module.exports = NutritionService;
