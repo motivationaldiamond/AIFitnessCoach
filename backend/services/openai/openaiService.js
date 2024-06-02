@@ -6,7 +6,8 @@ const NutritionService = require('../chat/nutritionService');
 const CardioService = require('../chat/cardioService');
 const CommunitySupportService = require('../chat/communitySupportService');
 const FitnessTrackingService = require('../chat/fitnessTrackingService');
-const GoalSettingService = require('../chat/goalSettingService'); // Added GoalSettingService
+const GoalSettingService = require('../chat/goalSettingService');
+const HydrationService = require('../chat/hydrationService'); // Import the HydrationService
 
 // Initialize OpenAI client
 const client = new OpenAIClient(openaiEndpoint, new AzureKeyCredential(openaiApiKey));
@@ -14,7 +15,8 @@ const nutritionService = new NutritionService();
 const cardioService = new CardioService();
 const communitySupportService = new CommunitySupportService();
 const fitnessTrackingService = new FitnessTrackingService();
-const goalSettingService = new GoalSettingService(); // Instantiated GoalSettingService
+const goalSettingService = new GoalSettingService();
+const hydrationService = new HydrationService(); // Create an instance of the HydrationService
 
 const fitnessSystemMessage = {
     role: "system",
@@ -41,8 +43,13 @@ const detectTrackingQuery = (userMessages) => {
     return userMessages.some(message => keywords.some(keyword => message.toLowerCase().includes(keyword)));
 };
 
-const detectGoalSettingQuery = (userMessages) => { // Added detectGoalSettingQuery function
+const detectGoalSettingQuery = (userMessages) => {
     const keywords = ['goal', 'target', 'objective', 'aim'];
+    return userMessages.some(message => keywords.some(keyword => message.toLowerCase().includes(keyword)));
+};
+
+const detectHydrationQuery = (userMessages) => {
+    const keywords = ['hydration', 'water intake', 'drink water'];
     return userMessages.some(message => keywords.some(keyword => message.toLowerCase().includes(keyword)));
 };
 
@@ -54,7 +61,8 @@ const getChatResponse = async (userMessages) => {
         const isCardioQuery = detectCardioQuery(userMessages);
         const isCommunityQuery = detectCommunityQuery(userMessages);
         const isTrackingQuery = detectTrackingQuery(userMessages);
-        const isGoalSettingQuery = detectGoalSettingQuery(userMessages); // Added check for goal setting query
+        const isGoalSettingQuery = detectGoalSettingQuery(userMessages);
+        const isHydrationQuery = detectHydrationQuery(userMessages); // Check for hydration query
 
         if (isNutritionQuery) {
             const nutritionResponse = await nutritionService.handleNutritionQuery(userMessages);
@@ -68,9 +76,12 @@ const getChatResponse = async (userMessages) => {
         } else if (isTrackingQuery) {
             const trackingResponse = await fitnessTrackingService.handleFitnessTrackingQuery(userMessages);
             return [trackingResponse];
-        } else if (isGoalSettingQuery) { // Added handling for goal setting query
+        } else if (isGoalSettingQuery) { 
             const goalSettingResponse = await goalSettingService.handleGoalSettingQuery(userMessages);
             return [goalSettingResponse];
+        } else if (isHydrationQuery) { // Handle hydration query
+            const hydrationResponse = await hydrationService.handleHydrationQuery(userMessages);
+            return [hydrationResponse];
         } else {
             const chatResponse = await client.getChatCompletions("roseblunts-gpt-deployment", messages);
             if (!chatResponse || !chatResponse.choices) {
