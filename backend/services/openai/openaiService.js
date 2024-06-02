@@ -12,7 +12,7 @@ const InjuryPreventionService = require('../chat/injuryPreventionService');
 const RecoveryService = require('../chat/recoveryService');
 const SleepService = require('../chat/sleepService');
 const StressManagementService = require('../chat/stressManagementService');
-
+const SupplementAdviceService = require('../chat/supplementAdviceService');
 
 // Initialize OpenAI client
 const client = new OpenAIClient(openaiEndpoint, new AzureKeyCredential(openaiApiKey));
@@ -26,6 +26,7 @@ const injuryPreventionService = new InjuryPreventionService();
 const recoveryService = new RecoveryService();
 const sleepService = new SleepService();
 const stressManagementService = new StressManagementService();
+const supplementAdviceService = new SupplementAdviceService();
 
 const fitnessSystemMessage = {
     role: "system",
@@ -82,6 +83,11 @@ const detectStressManagementQuery = (userMessages) => {
     return userMessages.some(message => keywords.some(keyword => message.toLowerCase().includes(keyword)));
 };
 
+const detectSupplementAdviceQuery = (userMessages) => {
+    const keywords = ['supplement', 'vitamin', 'mineral', 'nutrition'];
+    return userMessages.some(message => keywords.some(keyword => message.toLowerCase().includes(keyword)));
+};
+
 const getChatResponse = async (userMessages) => {
     const messages = [fitnessSystemMessage, ...userMessages.map(content => ({ role: 'user', content }))];
 
@@ -96,7 +102,7 @@ const getChatResponse = async (userMessages) => {
         const isRecoveryQuery = detectRecoveryQuery(userMessages);
         const isSleepQuery = detectSleepQuery(userMessages);
         const isStressManagementQuery = detectStressManagementQuery(userMessages);
-
+        const isSupplementAdviceQuery = detectSupplementAdviceQuery(userMessages);
 
         if (isNutritionQuery) {
             const nutritionResponse = await nutritionService.handleNutritionQuery(userMessages);
@@ -128,7 +134,9 @@ const getChatResponse = async (userMessages) => {
         } else if (isStressManagementQuery) {
             const stressManagementResponse = await stressManagementService.handleStressManagementQuery(userMessages);
             return [stressManagementResponse];
-
+        } else if (isSupplementAdviceQuery) { // Check if it's a supplement advice query
+            const supplementAdviceResponse = await supplementAdviceService.handleSupplementAdviceQuery(userMessages); // Handle supplement advice query
+            return [supplementAdviceResponse];
         
         } else {
             const chatResponse = await client.getChatCompletions("roseblunts-gpt-deployment", messages);
