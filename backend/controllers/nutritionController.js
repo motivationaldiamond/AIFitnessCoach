@@ -2,7 +2,6 @@
 
 const { createNutrition, getNutritions, getNutritionById, updateNutrition, deleteNutrition } = require('../models/nutritionModel');
 const Joi = require('joi');
-const { ObjectId } = require('mongodb');
 
 // Define the schema for validation
 const nutritionSchema = Joi.object({
@@ -93,4 +92,3 @@ module.exports = {
     updateNutritionById,
     deleteNutritionById,
 };
-

@@ -1,5 +1,6 @@
 // nutritionModel.js
 
+const { MongoClient, ObjectId } = require('mongodb');
 const { getDB } = require('../config/database');
 
 async function createNutrition(userId, meal, calories, date) {
