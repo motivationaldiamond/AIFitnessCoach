@@ -5,11 +5,13 @@ const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 const { openaiApiKey, openaiEndpoint } = require('../../config/keys');
 const NutritionService = require('../chat/nutritionService');
 const CardioService = require('../chat/cardioService');
+const CommunitySupportService = require('../chat/communitySupportService');
 
 // Initialize OpenAI client
 const client = new OpenAIClient(openaiEndpoint, new AzureKeyCredential(openaiApiKey));
 const nutritionService = new NutritionService();
 const cardioService = new CardioService();
+const communitySupportService = new CommunitySupportService();
 
 const fitnessSystemMessage = {
     role: "system",
@@ -22,8 +24,13 @@ const detectNutritionQuery = (userMessages) => {
 };
 
 const detectCardioQuery = (userMessages) => {
-    const cardioKeywords = ['cardio', 'running', 'cycling', 'exercise'];
-    return userMessages.some(message => cardioKeywords.some(keyword => message.toLowerCase().includes(keyword)));
+    const keywords = ['cardio', 'running', 'jogging', 'cycling', 'swimming'];
+    return userMessages.some(message => keywords.some(keyword => message.toLowerCase().includes(keyword)));
+};
+
+const detectCommunityQuery = (userMessages) => {
+    const keywords = ['support', 'help', 'motivation', 'encouragement', 'advice'];
+    return userMessages.some(message => keywords.some(keyword => message.toLowerCase().includes(keyword)));
 };
 
 const getChatResponse = async (userMessages) => {
@@ -32,6 +39,7 @@ const getChatResponse = async (userMessages) => {
     try {
         const isNutritionQuery = detectNutritionQuery(userMessages);
         const isCardioQuery = detectCardioQuery(userMessages);
+        const isCommunityQuery = detectCommunityQuery(userMessages);
 
         if (isNutritionQuery) {
             const nutritionResponse = await nutritionService.handleNutritionQuery(userMessages);
@@ -39,6 +47,9 @@ const getChatResponse = async (userMessages) => {
         } else if (isCardioQuery) {
             const cardioResponse = await cardioService.handleCardioQuery(userMessages);
             return [cardioResponse];
+        } else if (isCommunityQuery) {
+            const communityResponse = await communitySupportService.handleCommunityQuery(userMessages);
+            return [communityResponse];
         } else {
             const chatResponse = await client.getChatCompletions("roseblunts-gpt-deployment", messages);
             if (!chatResponse || !chatResponse.choices) {
