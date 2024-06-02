@@ -1,4 +1,4 @@
-//chatRoutes.js
+// chatRoutes.js
 
 const express = require('express');
 const { getChatResponse } = require('../services/openai/openaiService');
@@ -17,6 +17,7 @@ router.post('/advice', async (req, res) => {
     res.json({ response });
   } catch (error) {
     console.error('Failed to get chat response:', error);
+    console.error('Error object:', error);
     res.status(500).json({ error: 'Failed to get chat response.' });
   }
 });
