@@ -6,6 +6,7 @@ const NutritionService = require('../chat/nutritionService');
 const CardioService = require('../chat/cardioService');
 const CommunitySupportService = require('../chat/communitySupportService');
 const FitnessTrackingService = require('../chat/fitnessTrackingService');
+const GoalSettingService = require('../chat/goalSettingService'); // Added GoalSettingService
 
 // Initialize OpenAI client
 const client = new OpenAIClient(openaiEndpoint, new AzureKeyCredential(openaiApiKey));
@@ -13,6 +14,7 @@ const nutritionService = new NutritionService();
 const cardioService = new CardioService();
 const communitySupportService = new CommunitySupportService();
 const fitnessTrackingService = new FitnessTrackingService();
+const goalSettingService = new GoalSettingService(); // Instantiated GoalSettingService
 
 const fitnessSystemMessage = {
     role: "system",
@@ -39,6 +41,11 @@ const detectTrackingQuery = (userMessages) => {
     return userMessages.some(message => keywords.some(keyword => message.toLowerCase().includes(keyword)));
 };
 
+const detectGoalSettingQuery = (userMessages) => { // Added detectGoalSettingQuery function
+    const keywords = ['goal', 'target', 'objective', 'aim'];
+    return userMessages.some(message => keywords.some(keyword => message.toLowerCase().includes(keyword)));
+};
+
 const getChatResponse = async (userMessages) => {
     const messages = [fitnessSystemMessage, ...userMessages.map(content => ({ role: 'user', content }))];
 
@@ -47,6 +54,7 @@ const getChatResponse = async (userMessages) => {
         const isCardioQuery = detectCardioQuery(userMessages);
         const isCommunityQuery = detectCommunityQuery(userMessages);
         const isTrackingQuery = detectTrackingQuery(userMessages);
+        const isGoalSettingQuery = detectGoalSettingQuery(userMessages); // Added check for goal setting query
 
         if (isNutritionQuery) {
             const nutritionResponse = await nutritionService.handleNutritionQuery(userMessages);
@@ -60,6 +68,9 @@ const getChatResponse = async (userMessages) => {
         } else if (isTrackingQuery) {
             const trackingResponse = await fitnessTrackingService.handleFitnessTrackingQuery(userMessages);
             return [trackingResponse];
+        } else if (isGoalSettingQuery) { // Added handling for goal setting query
+            const goalSettingResponse = await goalSettingService.handleGoalSettingQuery(userMessages);
+            return [goalSettingResponse];
         } else {
             const chatResponse = await client.getChatCompletions("roseblunts-gpt-deployment", messages);
             if (!chatResponse || !chatResponse.choices) {
