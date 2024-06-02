@@ -9,8 +9,8 @@ const FitnessTrackingService = require('../chat/fitnessTrackingService');
 const GoalSettingService = require('../chat/goalSettingService');
 const HydrationService = require('../chat/hydrationService');
 const InjuryPreventionService = require('../chat/injuryPreventionService');
-const RecoveryService = require('../chat/recoveryService'); // Add RecoveryService import
-
+const RecoveryService = require('../chat/recoveryService');
+const SleepService = require('../chat/sleepService');
 // Initialize OpenAI client
 const client = new OpenAIClient(openaiEndpoint, new AzureKeyCredential(openaiApiKey));
 const nutritionService = new NutritionService();
@@ -20,7 +20,8 @@ const fitnessTrackingService = new FitnessTrackingService();
 const goalSettingService = new GoalSettingService();
 const hydrationService = new HydrationService();
 const injuryPreventionService = new InjuryPreventionService();
-const recoveryService = new RecoveryService(); // Initialize RecoveryService
+const recoveryService = new RecoveryService();
+const sleepService = new SleepService();
 
 const fitnessSystemMessage = {
     role: "system",
@@ -67,6 +68,11 @@ const detectRecoveryQuery = (userMessages) => {
     return userMessages.some(message => keywords.some(keyword => message.toLowerCase().includes(keyword)));
 };
 
+const detectSleepQuery = (userMessages) => {
+    const keywords = ['sleep', 'rest', 'bedtime', 'nap'];
+    return userMessages.some(message => keywords.some(keyword => message.toLowerCase().includes(keyword)));
+};
+
 const getChatResponse = async (userMessages) => {
     const messages = [fitnessSystemMessage, ...userMessages.map(content => ({ role: 'user', content }))];
 
@@ -79,6 +85,7 @@ const getChatResponse = async (userMessages) => {
         const isHydrationQuery = detectHydrationQuery(userMessages);
         const isInjuryPreventionQuery = detectInjuryPreventionQuery(userMessages);
         const isRecoveryQuery = detectRecoveryQuery(userMessages); // Add detection for recovery query
+        const isSleepQuery = detectSleepQuery(userMessages);
 
         if (isNutritionQuery) {
             const nutritionResponse = await nutritionService.handleNutritionQuery(userMessages);
@@ -101,9 +108,13 @@ const getChatResponse = async (userMessages) => {
         } else if (isInjuryPreventionQuery) {
             const injuryPreventionResponse = await injuryPreventionService.handleInjuryPreventionQuery(userMessages);
             return [injuryPreventionResponse];
-        } else if (isRecoveryQuery) { // Check if it's a recovery query
-            const recoveryResponse = await recoveryService.handleRecoveryQuery(userMessages); // Handle recovery query
+        } else if (isRecoveryQuery) {
+            const recoveryResponse = await recoveryService.handleRecoveryQuery(userMessages);
             return [recoveryResponse];
+        } else if (isSleepQuery) {
+            const sleepResponse = await sleepService.handleSleepQuery(userMessages);
+            return [sleepResponse];
+        
         } else {
             const chatResponse = await client.getChatCompletions("roseblunts-gpt-deployment", messages);
             if (!chatResponse || !chatResponse.choices) {
