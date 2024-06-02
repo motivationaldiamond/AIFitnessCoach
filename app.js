@@ -11,8 +11,8 @@ const nutritionRoutes = require('./backend/routes/nutritionRoutes');
 const chatRoutes = require('./backend/routes/chatRoutes');
 const loggingMiddleware = require('./backend/middleware/loggingMiddleware');
 const errorMiddleware = require('./backend/middleware/errorMiddleware');
-const { connectDB } = require('./backend/config/database');
-const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
+const connectDB = require('./backend/config/database');
+const { OpenAIClient, AzureKeyCredential } = require('@azure/openai');
 
 // Initialize Express application
 const app = express();
@@ -25,12 +25,6 @@ app.use(loggingMiddleware);
 // Connect to MongoDB
 connectDB()
   .then(() => {
-    console.log('Database connected...');
-
-    // Create OpenAI client instance
-    const client = new OpenAIClient(process.env.AZURE_OPENAI_ENDPOINT, new AzureKeyCredential(process.env.AZURE_OPENAI_API_KEY));
-
-  
 
     // Routes
     app.use('/api/users', userRoutes);

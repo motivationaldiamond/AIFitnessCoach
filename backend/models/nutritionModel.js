@@ -2,6 +2,21 @@
 
 const { MongoClient, ObjectId } = require('mongodb');
 const { getDB } = require('../config/database');
+const mongoose = require('mongoose');
+
+const nutritionSchema = new mongoose.Schema({
+    userId: { type: String, required: true },
+    meal: { type: String, required: true },
+    calories: { type: Number, required: true },
+    nutrients: {
+        protein: { type: String, required: true },
+        carbs: { type: String, required: true },
+        fat: { type: String, required: true },
+    },
+    date: { type: Date, required: true },
+});
+
+const Nutrition = mongoose.model('Nutrition', nutritionSchema);
 
 async function createNutrition(userId, meal, calories, date) {
     const db = getDB();
@@ -73,4 +88,5 @@ module.exports = {
     getNutritionById,
     updateNutrition,
     deleteNutrition,
+    Nutrition
 };

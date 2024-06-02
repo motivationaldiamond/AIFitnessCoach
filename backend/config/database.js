@@ -1,27 +1,16 @@
 //database.js
 
-const { MongoClient } = require('mongodb');
-const { dbURI } = require('../../backend/config/keys');
-
-let db;
+const mongoose = require('mongoose');
+const { dbURI } = require('./keys');
 
 const connectDB = async () => {
     try {
-        const client = new MongoClient(dbURI);
-        await client.connect();
-        console.log('Connected to MongoDB');
-        db = client.db(); // Assuming your database name is already included in the URI
+        await mongoose.connect(dbURI);
+        console.log('Database connected...');
     } catch (err) {
-        console.error('Error connecting to MongoDB:', err);
+        console.error('Error connecting to MongoDB:', err.message);
         process.exit(1);
     }
 };
 
-const getDB = () => {
-    if (!db) {
-        throw new Error('Database not initialized');
-    }
-    return db;
-};
-
-module.exports = { connectDB, getDB };
+module.exports = connectDB;
