@@ -1,30 +1,27 @@
 // exerciseModel.js
 
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
+const { getDB } = require('../config/database');
+const mongoose = require('mongoose');
 
-let db;
+const exerciseSchema = new mongoose.Schema({
+    userId: { type: String, required: true },
+    exerciseName: { type: String, required: true },
+    durationMinutes: { type: Number, required: true },
+    caloriesBurned: { type: Number, required: true },
+    date: { type: Date, required: true },
+});
 
-async function connectDB(dbURI) {
-    try {
-        const client = new MongoClient(dbURI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
-        await client.connect();
-        console.log('Connected to MongoDB');
-        db = client.db(); // Assuming your database name is already included in the URI
-    } catch (err) {
-        console.error('Error connecting to MongoDB:', err);
-        process.exit(1);
-    }
-}
+const Exercise = mongoose.model('Exercise', exerciseSchema);
 
-async function createExercise(userId, type, duration, date) {
+async function createExercise(userId, exerciseName, durationMinutes, caloriesBurned, date) {
+    const db = getDB();
     try {
         const result = await db.collection('exercises').insertOne({
             userId,
-            type,
-            duration,
+            exerciseName,
+            durationMinutes,
+            caloriesBurned,
             date,
         });
         console.log('Exercise created:', result.insertedId);
@@ -35,7 +32,58 @@ async function createExercise(userId, type, duration, date) {
     }
 }
 
+async function getExercises() {
+    const db = getDB();
+    try {
+        const exercises = await db.collection('exercises').find({}).toArray();
+        return exercises;
+    } catch (err) {
+        console.error('Error retrieving exercises:', err);
+        throw err;
+    }
+}
+
+async function getExerciseById(id) {
+    const db = getDB();
+    try {
+        const exercise = await db.collection('exercises').findOne({ _id: new ObjectId(id) });
+        return exercise;
+    } catch (err) {
+        console.error('Error retrieving exercise:', err);
+        throw err;
+    }
+}
+
+async function updateExercise(id, updatedExercise) {
+    const db = getDB();
+    try {
+        const result = await db.collection('exercises').updateOne(
+            { _id: new ObjectId(id) },
+            { $set: updatedExercise }
+        );
+        return result.modifiedCount > 0;
+    } catch (err) {
+        console.error('Error updating exercise:', err);
+        throw err;
+    }
+}
+
+async function deleteExercise(id) {
+    const db = getDB();
+    try {
+        const result = await db.collection('exercises').deleteOne({ _id: new ObjectId(id) });
+        return result.deletedCount > 0;
+    } catch (err) {
+        console.error('Error deleting exercise:', err);
+        throw err;
+    }
+}
+
 module.exports = {
-    connectDB,
     createExercise,
+    getExercises,
+    getExerciseById,
+    updateExercise,
+    deleteExercise,
+    Exercise
 };
