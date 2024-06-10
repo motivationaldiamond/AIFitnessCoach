@@ -1,7 +1,7 @@
 //authService.js
 
 const bcrypt = require('bcryptjs');
-const User = require('./models/User'); // Assuming User is a Mongoose model
+const User = require('../../models/userModel');
 
 class AuthService {
     async register(user) {

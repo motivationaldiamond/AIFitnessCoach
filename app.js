@@ -12,7 +12,7 @@ const chatRoutes = require('./backend/routes/chatRoutes');
 const loggingMiddleware = require('./backend/middleware/loggingMiddleware');
 const errorMiddleware = require('./backend/middleware/errorMiddleware');
 const connectDB = require('./backend/config/database');
-const { OpenAIClient, AzureKeyCredential } = require('@azure/openai');
+const authRoutes = require('./backend/routes/authRoutes');
 
 // Initialize Express application
 const app = express();
@@ -25,8 +25,10 @@ app.use(loggingMiddleware);
 // Connect to MongoDB
 connectDB()
   .then(() => {
+    console.log('Database connected...');
 
     // Routes
+    app.use('/api/auth', authRoutes);
     app.use('/api/users', userRoutes);
     app.use('/api/exercises', exerciseRoutes);
     app.use('/api/nutrition', nutritionRoutes);

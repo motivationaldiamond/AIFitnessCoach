@@ -6,7 +6,7 @@ const { dbURI } = require('./keys');
 const connectDB = async () => {
     try {
         await mongoose.connect(dbURI);
-        console.log('Database connected...');
+        // console.log('Database connected...');
     } catch (err) {
         console.error('Error connecting to MongoDB:', err.message);
         process.exit(1);
